@@ -71,45 +71,31 @@ def load_test_cases(filename='test_cases.json'):
     return loaded_cases
 
 def calculate_metrics(solution, case, cost, iterations, execution_time):
-    coverage_matrix = case['matriz'][:, solution == 1]
-    covered_points = np.any(coverage_matrix, axis=1)
-    
     return {
-        # Métricas originais
-        'cobertura': float(cost),
-        'cobertura_percentual': float((cost/case['populacao'].sum())*100),
-        'iteracoes': iterations,
-        'tempo_execucao': execution_time,
-        'posicoes_bases': np.where(solution == 1)[0].tolist(),
-        'dimensao_matriz': list(case['matriz'].shape),
-        'num_bases': case['num_bases'],
-        'populacao_total': float(case['populacao'].sum()),
-        'densidade_matriz': float(np.sum(case['matriz']) / (case['matriz'].shape[0] * case['matriz'].shape[1])),
+        # Métricas essenciais da função objetivo
+        'cobertura': float(cost),  # Valor absoluto da função objetivo
+        'cobertura_percentual': float((cost/case['populacao'].sum())*100),  # Porcentagem da população total coberta
+        'cobertura_media_por_base': float(cost / case['num_bases']),  # Eficiência média de cada base
         
-        # Métricas adicionais
-        'pontos_cobertos': int(np.sum(covered_points)),
-        'porcentagem_pontos_cobertos': float(np.sum(covered_points) / len(covered_points) * 100),
-        'celulas_cobertas': int(np.sum(coverage_matrix)),
-        'porcentagem_celulas_cobertas': float(np.sum(coverage_matrix) / coverage_matrix.size * 100),
-        'cobertura_media_por_base': float(cost / case['num_bases']),
-        'pontos_por_base': float(case['matriz'].shape[0] / case['num_bases']),
-        'populacao_media_por_ponto': float(case['populacao'].sum() / case['matriz'].shape[0]),
-        'tempo_por_iteracao': float(execution_time / iterations),
-        'iteracoes_por_segundo': float(iterations / execution_time)
+        # Métricas do problema
+        'dimensao_matriz': list(case['matriz'].shape),  # Tamanho da instância
+        'num_bases': case['num_bases'],  # Número de bases disponíveis
+        'populacao_total': float(case['populacao'].sum()),  # População total da instância
+        
+        # Métricas de performance
+        'tempo_execucao': execution_time,  # Tempo total de execução
+        'iteracoes': iterations  # Número de iterações
     }
 
 def print_metrics(metrics):
-    print(f"Dimensões: {metrics['dimensao_matriz']}")
-    print(f"Número de bases: {metrics['num_bases']}")
-    print(f"Cobertura populacional: {metrics['cobertura']:,.0f}")
-    print(f"Porcentagem coberta: {metrics['cobertura_percentual']:.2f}%")
-    print(f"Pontos de demanda cobertos: {metrics['pontos_cobertos']} ({metrics['porcentagem_pontos_cobertos']:.2f}%)")
-    print(f"Células cobertas: {metrics['celulas_cobertas']} ({metrics['porcentagem_celulas_cobertas']:.2f}%)")
+    print(f"Dimensões da instância: {metrics['dimensao_matriz']}")
+    print(f"Número de bases disponíveis: {metrics['num_bases']}")
+    print(f"População total da instância: {metrics['populacao_total']:,.0f}")
+    print(f"Cobertura alcançada (F.O.): {metrics['cobertura']:,.0f}")
+    print(f"Porcentagem da população coberta: {metrics['cobertura_percentual']:.2f}%")
     print(f"Cobertura média por base: {metrics['cobertura_media_por_base']:,.0f}")
-    print(f"Iterações: {metrics['iteracoes']}")
     print(f"Tempo de execução: {metrics['tempo_execucao']:.2f}s")
-    print(f"Iterações por segundo: {metrics['iteracoes_por_segundo']:.2f}")
-    print(f"Tempo por iteração: {metrics['tempo_por_iteracao']*1000:.2f}ms")
+    print(f"Iterações realizadas: {metrics['iteracoes']}")
 
 def run_tabu_search(test_cases):
     results = {}
